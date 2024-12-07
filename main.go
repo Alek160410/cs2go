@@ -132,7 +132,7 @@ func getOffsets() Offset {
 	var offsets Offset
 
 	// URL to the raw GitHub file
-	url := "https://raw.githubusercontent.com/username/repo/branch/path/to/offsets.json"
+	url := "https://raw.githubusercontent.com/Alek160410/cs2go/refs/heads/main/offsets.json"
 
 	// Make a GET request
 	resp, err := http.Get(url)
