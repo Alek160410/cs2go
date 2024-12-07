@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -129,20 +131,37 @@ func worldToScreen(viewMatrix Matrix, position Vector3) (float32, float32) {
 func getOffsets() Offset {
 	var offsets Offset
 
-	// Open the file
-	offsetsJson, err := os.Open("offsets.json")
+	// URL to the raw GitHub file
+	url := "https://raw.githubusercontent.com/username/repo/branch/path/to/offsets.json"
+
+	// Make a GET request
+	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Error opening offsets.json", err)
+		fmt.Println("Error fetching offsets from URL:", err)
 		return offsets
 	}
-	defer offsetsJson.Close()
+	defer resp.Body.Close()
+
+	// Check HTTP status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Error: HTTP status %d while fetching offsets\n", resp.StatusCode)
+		return offsets
+	}
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return offsets
+	}
 
 	// Decode the JSON
-	err = json.NewDecoder(offsetsJson).Decode(&offsets)
+	err = json.Unmarshal(body, &offsets)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
 		return offsets
 	}
+
 	return offsets
 }
 
